@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>கிளாசிக்கல் கால இசைக் கருவிகள் - Interactive Quiz Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700;800&family=Fredoka:wght@500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Mukta Malar', 'Fredoka', 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+        }
+
+        .glass-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-option {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-3 sm:p-6 text-slate-800">
+
+    <div class="w-full max-w-3xl glass-box rounded-3xl overflow-hidden border border-white/20 my-auto">
+        
+        <!-- Header Banner -->
+        <header class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-5 sm:p-7 text-white text-center relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 opacity-15 text-8xl text-white">
+                <i class="fa-solid fa-music"></i>
+            </div>
+            <div class="absolute -left-6 -top-6 opacity-15 text-8xl text-white">
+                <i class="fa-solid fa-guitar"></i>
+            </div>
+            
+            <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold tracking-wider uppercase mb-2">
+                ஆண்டு 6 - இசைக்கல்வி (Muzik Tahun 6)
+            </span>
+            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-wide drop-shadow-md">
+                கிளாசிக்கல் கால இசைக் கருவிகள்
+            </h1>
+            <p class="text-indigo-100 text-xs sm:text-sm mt-1 font-medium">
+                இன்டராக்டிவ் விளையாட்டுப் புதிர் | 15 கேள்விகள் • கேள்விக்கு 10 புள்ளிகள்
+            </p>
+        </header>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="p-6 sm:p-10 text-center space-y-6">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-orange-500/30 animate-float">
+                <i class="fa-solid fa-trophy text-4xl sm:text-5xl text-white"></i>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800">
+                    தயாராக இருக்கிறீர்களா? (Adakah Anda Bersedia?)
+                </h2>
+                <p class="text-slate-600 max-w-md mx-auto text-xs sm:text-sm leading-relaxed">
+                    பாடநூல் பக்கத்தின் அடிப்படையில் தயாரிக்கப்பட்ட 15 கேள்விகளுக்குச் சரியாகப் பதிலளித்து, உங்கள் விருதை வெல்லுங்கள்!
+                </p>
+            </div>
+
+            <!-- Student Name Input Box -->
+            <div class="max-w-md mx-auto bg-indigo-50/80 border border-indigo-200 p-4 rounded-2xl text-left space-y-2 shadow-sm">
+                <label for="student-name-input" class="block text-xs sm:text-sm font-bold text-indigo-900">
+                    <i class="fa-solid fa-user-pen mr-1.5 text-indigo-600"></i>
+                    மாணவர் பெயர் (Nama Murid): <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="student-name-input" 
+                    placeholder="உங்கள் பெயரை உள்ளிடுக (Masukkan Nama Anda)" 
+                    class="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 outline-none transition text-slate-800 font-semibold bg-white text-sm"
+                    onkeypress="if(event.key === 'Enter') validateAndStart()"
+                />
+                <p id="name-error-msg" class="text-rose-600 text-xs font-bold hidden flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    தொடர்வதற்கு முன் உங்கள் பெயரை உள்ளிடுக! (Sila masukkan nama anda)
+                </p>
+            </div>
+
+            <!-- Rules Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto text-left text-xs sm:text-sm">
+                <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shrink-0">15</div>
+                    <div>
+                        <div class="font-bold text-indigo-900">கேள்விகள்</div>
+                        <div class="text-slate-500 text-xs">மொத்தம் 15 கேள்விகள்</div>
+                    </div>
+                </div>
+                <div class="bg-purple-50 border border-purple-100 p-3 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shrink-0">10</div>
+                    <div>
+                        <div class="font-bold text-purple-900">புள்ளிகள்</div>
+                        <div class="text-slate-500 text-xs">ஒரு கேள்விக்கு 10 மதிப்பெண்</div>
+                    </div>
+                </div>
+                <div class="bg-pink-50 border border-pink-100 p-3 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 bg-pink-500 text-white rounded-xl flex items-center justify-center text-lg font-bold shrink-0">150</div>
+                    <div>
+                        <div class="font-bold text-pink-900">உச்ச மதிப்பெண்</div>
+                        <div class="text-slate-500 text-xs">சிறப்பு விருது (Ganjaran)</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="validateAndStart()" class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold text-lg sm:text-xl rounded-2xl shadow-xl shadow-indigo-500/30 transform hover:-translate-y-1 transition duration-200 cursor-pointer w-full sm:w-auto">
+                <i class="fa-solid fa-play mr-2"></i> விளையாட்டைத் தொடங்கு! (Mula)
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="p-5 sm:p-8 space-y-6 hidden">
+            
+            <!-- Student Header Banner -->
+            <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-slate-700 bg-indigo-50/80 border border-indigo-100 p-3 rounded-2xl">
+                <div class="flex items-center gap-2 text-indigo-900">
+                    <i class="fa-solid fa-circle-user text-indigo-600 text-lg"></i>
+                    <span>மாணவர்: <strong id="active-student-display" class="text-indigo-700">--</strong></span>
+                </div>
+                <div class="flex items-center gap-2 text-amber-600 bg-white px-3 py-1 rounded-xl border border-amber-200 shadow-sm">
+                    <i class="fa-solid fa-star text-amber-500"></i>
+                    <span>மதிப்பெண்: <strong id="current-score" class="text-base font-extrabold text-amber-700">0</strong> / 150</span>
+                </div>
+            </div>
+
+            <!-- Progress & Badge Bar -->
+            <div class="flex items-center justify-between text-xs font-bold text-slate-600">
+                <span class="bg-indigo-600 text-white px-3 py-1 rounded-xl" id="question-number-badge">
+                    கேள்வி 1/15
+                </span>
+                <span class="text-indigo-600 uppercase tracking-wide font-semibold" id="question-category">
+                    வகைப்பாடு
+                </span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden p-0.5">
+                <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-2 rounded-full transition-all duration-300" style="width: 6.66%"></div>
+            </div>
+
+            <!-- Question Box -->
+            <div class="bg-gradient-to-br from-indigo-50/90 to-purple-50/90 border border-indigo-100 rounded-2xl p-4 sm:p-6 text-center space-y-2">
+                <h3 id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-snug">
+                    கேள்வி உரை இங்கே தோன்றும்...
+                </h3>
+            </div>
+
+            <!-- Options Grid (Dynamically Shuffled) -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <!-- Dynamically populated with randomized answers -->
+            </div>
+
+            <!-- Explanation Box (Appears after answer) -->
+            <div id="explanation-box" class="hidden p-4 rounded-2xl border text-sm space-y-1 animate-fade-in">
+                <div class="font-bold flex items-center gap-2" id="explanation-title">
+                    <!-- Icon + status -->
+                </div>
+                <p id="explanation-text" class="text-slate-700 leading-relaxed text-xs sm:text-sm">
+                    விளக்கம் இங்கே தோன்றும்.
+                </p>
+            </div>
+
+            <!-- Next Button -->
+            <div class="text-right">
+                <button id="next-btn" onclick="nextQuestion()" disabled class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md disabled:opacity-40 disabled:cursor-not-allowed transition duration-200 flex items-center gap-2 ml-auto cursor-pointer">
+                    <span>அடுத்த கேள்வி</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="p-6 sm:p-10 text-center space-y-6 hidden">
+            
+            <!-- Reward Badge Area -->
+            <div id="badge-container" class="animate-bounce">
+                <!-- Dynamically updated -->
+            </div>
+
+            <div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-800" id="result-title">
+                    வாழ்த்துகள்!
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-1" id="result-subtitle">
+                    நீங்கள் விளையாட்டை நிறைவு செய்துவிட்டீர்கள்.
+                </p>
+            </div>
+
+            <!-- Score Summary Card -->
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-3xl p-6 max-w-md mx-auto space-y-4 shadow-inner">
+                <div class="text-xs uppercase font-bold tracking-wider text-slate-500">
+                    மாணவர்: <span id="summary-student-name" class="text-indigo-700 font-extrabold text-sm">--</span>
+                </div>
+                <div class="text-5xl sm:text-6xl font-black text-indigo-600 tracking-tight" id="final-score">
+                    0 <span class="text-xl text-slate-400 font-normal">/ 150</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 pt-2 text-xs sm:text-sm">
+                    <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl">
+                        <div class="text-emerald-700 font-bold" id="correct-count">0</div>
+                        <div class="text-slate-500">சரியான பதில்</div>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-xl">
+                        <div class="text-rose-700 font-bold" id="wrong-count">0</div>
+                        <div class="text-slate-500">தவறான பதில்</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+                <button onclick="restartWithNewStudent()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition duration-200 flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>புதிய மாணவர் (Main Semula)</span>
+                </button>
+                <button onclick="toggleReviewModal(true)" class="px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-2xl shadow-lg transition duration-200 flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>பதில்களைச் சரிபார்க்க</span>
+                </button>
+            </div>
+
+            <!-- List of Completed Students Section (Bahasa Tamil) -->
+            <div class="pt-6 border-t border-slate-200 text-left space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-users-rectangle text-indigo-600"></i>
+                        <span>பங்கேற்ற மாணவர்களின் விவரம் (Senarai Murid Yang Telah Menjawab)</span>
+                    </h3>
+                    <button onclick="openTeacherAuthModal()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>பட்டியலை அழி (Padam Senarai)</span>
+                    </button>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-inner max-h-60 overflow-y-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-indigo-600 text-white font-semibold">
+                                <th class="p-3">எண்</th>
+                                <th class="p-3">மாணவர் பெயர்</th>
+                                <th class="p-3 text-center">மதிப்பெண்</th>
+                                <th class="p-3 text-center">விருது</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completed-students-list-body" class="divide-y divide-slate-200 bg-white">
+                            <!-- Dynamically injected -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Review Answers Modal -->
+    <div id="review-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-5 border-b flex justify-between items-center bg-indigo-600 text-white">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    விடைச் சரிபார்ப்பு (Semakan Jawapan)
+                </h3>
+                <button onclick="toggleReviewModal(false)" class="text-white/80 hover:text-white text-2xl font-bold cursor-pointer">
+                    &times;
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-4 flex-1 text-left" id="review-list">
+                <!-- Dynamically generated review list -->
+            </div>
+            <div class="p-4 border-t text-right bg-slate-50">
+                <button onclick="toggleReviewModal(false)" class="px-5 py-2 bg-slate-700 text-white font-bold rounded-xl text-sm hover:bg-slate-800 cursor-pointer">
+                    மூடுக (Tutup)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Password Verification Modal -->
+    <div id="teacher-auth-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-left border border-slate-100">
+            <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-indigo-600"></i>
+                    <span>ஆசிரியர் அனுமதி (Kebenaran Guru)</span>
+                </h3>
+                <button onclick="closeTeacherAuthModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold cursor-pointer">
+                    &times;
+                </button>
+            </div>
+            
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                மாணவர் பட்டியலை அழிக்க ஆசிரியரின் கடவுச்சொல்லை உள்ளிடவும்:
+                <br><span class="text-slate-500 font-medium">(Sila masukkan kata laluan guru untuk memadam senarai)</span>
+            </p>
+
+            <div class="space-y-2">
+                <label for="teacher-pass-input" class="block text-xs font-bold text-slate-700">
+                    கடவுச்சொல் (Kata Laluan Guru):
+                </label>
+                <input 
+                    type="password" 
+                    id="teacher-pass-input" 
+                    placeholder="கடவுச்சொல் (Pin: 1234)" 
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-semibold text-slate-800 text-sm"
+                    onkeypress="if(event.key === 'Enter') verifyAndClearLeaderboard()"
+                />
+                <p id="teacher-auth-error" class="text-rose-600 text-xs font-bold hidden flex items-center gap-1">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    தவறான கடவுச்சொல்! (Kata laluan salah)
+                </p>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button onclick="closeTeacherAuthModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs cursor-pointer">
+                    ரத்து செய் (Batal)
+                </button>
+                <button onclick="verifyAndClearLeaderboard()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs cursor-pointer flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>உறுதிசெய் (Padam)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data based strictly on Year 6 Textbook Page 67
+        const quizDataMaster = [
+            {
+                question: "சீவாளியைக் கொண்டு (நாதசுரம் போல்) காற்று அழுத்தத்தால் நல்ல தொனியுடன் இயங்கும் காற்றிசைக் கருவி எது?",
+                category: "காற்றிசைக் கருவிகள்",
+                correctAnswerText: "ஓபோ (Oboe)",
+                incorrectAnswers: [
+                    "குழல் (Flute)",
+                    "டிரம்பெட் (Trumpet)",
+                    "முரசு (Timpani)"
+                ],
+                explanation: "ஓபோ (Oboe) சீவாளியைக் கொண்டு காற்று அழுத்தத்தால் நல்ல தொனியுடன் இயக்காற்றலை ஏற்படுத்தக்கூடியது."
+            },
+            {
+                question: "காற்றிசைக் கருவி குடும்பத்தில் கீழ் சுதியை (low pitch) எழுப்பும் கருவி எது?",
+                category: "காற்றிசைக் கருவிகள்",
+                correctAnswerText: "பாசூன் (Bassoon)",
+                incorrectAnswers: [
+                    "சிறுகுழல் பிக்கோலோ",
+                    "டிரம்பெட்",
+                    "வயலின்"
+                ],
+                explanation: "பாசூன் (Bassoon) காற்றிசைக் கருவி குடும்பத்தில் கீழ் சுதியை எழுப்பும் கருவியாகும்."
+            },
+            {
+                question: "வெண்கலக் கருவிகளில் (Brass Instruments) மிகச் சிறியது மற்றும் உயர்ந்த சுதி எழுப்பக் கூடியது எது?",
+                category: "வெண்கலக் கருவிகள் (Brass)",
+                correctAnswerText: "டிரம்பெட் (Trumpet)",
+                incorrectAnswers: [
+                    "கொம்பு (Horn)",
+                    "செல்லோ (Cello)",
+                    "முரசு (Timpani)"
+                ],
+                explanation: "டிரம்பெட் (Trumpet) வெண்கலக் கருவிகளில் மிகச் சிறியது மற்றும் உயர்ந்த சுதி எழுப்பக் கூடியது."
+            },
+            {
+                question: "வெண்கலத்தில் ஆன கருவி மற்றும் பெரும் இசைக்குழுவில் மிக அதிகமாகப் பயன்படுத்தப்படும் கருவி எது?",
+                category: "வெண்கலக் கருவிகள் (Brass)",
+                correctAnswerText: "கொம்பு (Horn)",
+                incorrectAnswers: [
+                    "டிரம்பெட் (Trumpet)",
+                    "கிளாரினெட் (Clarinet)",
+                    "வியோலா (Viola)"
+                ],
+                explanation: "கொம்பு (Horn) வெண்கலத்தால் ஆன கருவி மற்றும் பெரும் இசைக்குழுவில் மிக அதிகமாகப் பயன்படுத்தப்படும்."
+            },
+            {
+                question: "சுதியேற்றக் கூடியதும், அதிர்வினை உண்டாக்கும் தாளக் கருவி (Percussion Instrument) எது?",
+                category: "தாளக் கருவிகள் (Percussion)",
+                correctAnswerText: "முரசு (Timpani)",
+                incorrectAnswers: [
+                    "பாசூன் (Bassoon)",
+                    "கொம்பு (Horn)",
+                    "டபுள் பேஸ் (Double bass)"
+                ],
+                explanation: "முரசு (Timpani) ஒரு தாளக் கருவியாகும். இது சுதியேற்றக் கூடியது மற்றும் அதிர்வினை உண்டாக்கும்."
+            },
+            {
+                question: "நரம்பிசைக் கருவிகளில் (String Instruments) மிக அதிகமாகப் பயன்படுத்தப்படும் கருவி எது?",
+                category: "நரம்பிசைக் கருவிகள் (Strings)",
+                correctAnswerText: "வயலின் (Violin)",
+                incorrectAnswers: [
+                    "செல்லோ (Cello)",
+                    "டபுள் பேஸ் (Double bass)",
+                    "ஓபோ (Oboe)"
+                ],
+                explanation: "வயலின் (Violin) நரம்பிசைக் கருவி குடும்பத்தில் மிக அதிகமாகப் பயன்படுத்தப்படும் கருவியாகும்."
+            },
+            {
+                question: "வயலினைவிடப் பெரிய நரம்பிசைக் கருவி எது?",
+                category: "நரம்பிசைக் கருவிகள் (Strings)",
+                correctAnswerText: "வியோலா (Viola)",
+                incorrectAnswers: [
+                    "சிறுகுழல் பிக்கோலோ",
+                    "டிரம்பெட்",
+                    "குழல்"
+                ],
+                explanation: "வியோலா (Viola) நரம்பிசைக் கருவி. இது வயலினைவிடப் பெரியது."
+            },
+            {
+                question: "வியோலாவை விடப் பெரியதும், செங்குத்தாக நிறுத்தி இசைக்கப்படும் நரம்பிசைக் கருவி எது?",
+                category: "நரம்பிசைக் கருவிகள் (Strings)",
+                correctAnswerText: "செல்லோ (Cello)",
+                incorrectAnswers: [
+                    "வயலின் (Violin)",
+                    "கிளாரினெட் (Clarinet)",
+                    "கொம்பு (Horn)"
+                ],
+                explanation: "செல்லோ (Cello) வியோலாவை விடப் பெரிய நரம்பிசைக் கருவியாகும். இது செங்குத்தாக நிறுத்தி இசைக்கப்படும்."
+            },
+            {
+                question: "நரம்பிசைக் கருவிகளில் மிகமிகக் கீழ் சுதியை எழுப்பும், செங்குத்தாக நிறுத்தி இசைக்கப்படும் கருவி எது?",
+                category: "நரம்பிசைக் கருவிகள் (Strings)",
+                correctAnswerText: "டபுள் பேஸ் (Double bass)",
+                incorrectAnswers: [
+                    "வயலின் (Violin)",
+                    "வியோலா (Viola)",
+                    "டிரம்பெட் (Trumpet)"
+                ],
+                explanation: "டபுள் பேஸ் (Double bass) மிகமிகக் கீழ் சுதியை எழுப்பும் நரம்பிசைக் கருவி. இது செங்குத்தாக நிறுத்தி இசைக்கப்படும்."
+            },
+            {
+                question: "பாடநூலின்படி 'சீவாளியைக் கொண்டு இசைக்கக் கூடிய' இரு காற்றிசைக் கருவிகள் எவை?",
+                category: "ஒப்பீட்டுக் கேள்விகள்",
+                correctAnswerText: "ஓபோ (Oboe) மற்றும் கிளாரினெட் (Clarinet)",
+                incorrectAnswers: [
+                    "வயலின் (Violin) மற்றும் செல்லோ (Cello)",
+                    "டிரம்பெட் (Trumpet) மற்றும் கொம்பு (Horn)",
+                    "முரசு (Timpani) மற்றும் குழல் (Flute)"
+                ],
+                explanation: "ஓபோ மற்றும் கிளாரினெட் ஆகிய இரண்டுமே சீவாளியைக் கொண்டு இசைக்கக் கூடிய காற்றிசைக் கருவிகளாகும்."
+            },
+            {
+                question: "கீழ்வருவனவற்றுள் எது 'நரம்பிசைக் கருவி' (String Instrument) அல்ல?",
+                category: "கருவி வகைப்பாடு",
+                correctAnswerText: "பாசூன் (Bassoon)",
+                incorrectAnswers: [
+                    "வயலின் (Violin)",
+                    "செல்லோ (Cello)",
+                    "டபுள் பேஸ் (Double bass)"
+                ],
+                explanation: "பாசூன் (Bassoon) என்பது காற்றிசைக் கருவி (Woodwind) குடும்பத்தைச் சேர்ந்தது."
+            },
+            {
+                question: "செங்குத்தாக நிறுத்தி இசைக்கப்படும் இரு நரம்பிசைக் கருவிகள் எவை?",
+                category: "கருவி இயக்கம்",
+                correctAnswerText: "செல்லோ (Cello) மற்றும் டபுள் பேஸ் (Double bass)",
+                incorrectAnswers: [
+                    "வயலின் (Violin) மற்றும் வியோலா (Viola)",
+                    "டிரம்பெட் (Trumpet) மற்றும் கொம்பு (Horn)",
+                    "ஓபோ (Oboe) மற்றும் கிளாரினெட் (Clarinet)"
+                ],
+                explanation: "செல்லோ மற்றும் டபுள் பேஸ் ஆகிய இரண்டும் செங்குத்தாக நிறுத்தி இசைக்கப்படும் நரம்பிசைக் கருவிகளாகும்."
+            },
+            {
+                question: "காற்றிசைக் கருவிகள் குடும்பத்தில் சிறுசிறு துளைகள் கொண்டதும், மிக உயர்ந்த சுதியை உண்டாக்கும் கருவி எது?",
+                category: "காற்றிசைக் கருவிகள்",
+                correctAnswerText: "சிறுகுழல் பிக்கோலோ (Piccolo)",
+                incorrectAnswers: [
+                    "பாசூன் (Bassoon)",
+                    "கொம்பு (Horn)",
+                    "செல்லோ (Cello)"
+                ],
+                explanation: "சிறுகுழல் பிக்கோலோ (Piccolo) மிக உயர்ந்த சுதியை உண்டாக்கும் மற்றும் பெரும் இசைக்குழுவில் தனியாக இசைக்கப்படும்."
+            },
+            {
+                question: "காற்றிசைக் குடும்பத்தைச் சேர்ந்ததும், சிறு குழுவுக்கும் கீழ் சுதியைக் கொண்டதுமான கருவி எது?",
+                category: "காற்றிசைக் கருவிகள்",
+                correctAnswerText: "குழல் (Flute)",
+                incorrectAnswers: [
+                    "சிறுகுழல் பிக்கோலோ (Piccolo)",
+                    "டிரம்பெட் (Trumpet)",
+                    "வியோலா (Viola)"
+                ],
+                explanation: "குழல் (Flute) காற்றிசைக் குடும்பத்தைச் சேர்ந்தது மற்றும் சிறு குழுவுக்கும் கீழ் சுதியைக் கொண்டது."
+            },
+            {
+                question: "சீவாளியைக் கொண்டு இசைக்கப்படக்கூடிய மற்றொரு காற்றிசைக் கருவி (Woodwind Instrument) எது?",
+                category: "காற்றிசைக் கருவிகள்",
+                correctAnswerText: "கிளாரினெட் (Clarinet)",
+                incorrectAnswers: [
+                    "குழல் (Flute)",
+                    "கொம்பு (Horn)",
+                    "வயலின் (Violin)"
+                ],
+                explanation: "கிளாரினெட் (Clarinet) சீவாளியைக் கொண்டு இசைக்கப்படும் காற்றிசைக் கருவியாகும்."
+            }
+        ];
+
+        // Web Audio Synthesizer for Sound Effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                // Happy Chime (Arpeggio)
+                const now = audioCtx.currentTime;
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                
+                osc.start(now);
+                osc.stop(now + 0.6);
+            } else if (type === 'wrong') {
+                // Low Buzz
+                const now = audioCtx.currentTime;
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(140, now + 0.15);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'win') {
+                // Fanfare
+                const notes = [523.25, 659.25, 783.99, 1046.50, 880, 1046.50];
+                const times = [0, 0.12, 0.24, 0.36, 0.5, 0.65];
+                times.forEach((t, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.type = 'triangle';
+                    o.frequency.value = notes[i];
+                    g.gain.setValueAtTime(0.25, audioCtx.currentTime + t);
+                    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t + 0.25);
+                    o.start(audioCtx.currentTime + t);
+                    o.stop(audioCtx.currentTime + t + 0.25);
+                });
+            }
+        }
+
+        // Utility function to shuffle an array randomly (Fisher-Yates)
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Game State Variables
+        let currentStudentName = "";
+        let quizSessionData = []; // Store question + randomized options
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let answered = false;
+
+        function validateAndStart() {
+            const input = document.getElementById('student-name-input');
+            const errorMsg = document.getElementById('name-error-msg');
+            const name = input.value.trim();
+
+            if (!name) {
+                errorMsg.classList.remove('hidden');
+                input.classList.add('border-rose-500', 'bg-rose-50');
+                input.focus();
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            input.classList.remove('border-rose-500', 'bg-rose-50');
+            currentStudentName = name;
+
+            startGame();
+        }
+
+        function startGame() {
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = [];
+            answered = false;
+
+            // Prepare session data with randomized option order for every question!
+            quizSessionData = quizDataMaster.map(q => {
+                const allOptions = shuffleArray([q.correctAnswerText, ...q.incorrectAnswers]);
+                const correctIdx = allOptions.indexOf(q.correctAnswerText);
+                return {
+                    question: q.question,
+                    category: q.category,
+                    options: allOptions,
+                    correct: correctIdx,
+                    correctText: q.correctAnswerText,
+                    explanation: q.explanation
+                };
+            });
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            document.getElementById('active-student-display').innerText = currentStudentName;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const q = quizSessionData[currentQuestion];
+
+            // Update Header Info
+            document.getElementById('question-number-badge').innerText = `கேள்வி ${currentQuestion + 1} / ${quizSessionData.length}`;
+            document.getElementById('current-score').innerText = score;
+            document.getElementById('question-category').innerText = q.category;
+            document.getElementById('question-text').innerText = q.question;
+
+            // Update Progress Bar
+            const progressPercent = ((currentQuestion + 1) / quizSessionData.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Reset Explanation Box & Next Button
+            document.getElementById('explanation-box').classList.add('hidden');
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = true;
+            nextBtn.innerHTML = currentQuestion === quizSessionData.length - 1 
+                ? '<span>முடிவுகளைப் காண்க</span> <i class="fa-solid fa-trophy"></i>' 
+                : '<span>அடுத்த கேள்வி</span> <i class="fa-solid fa-arrow-right"></i>';
+
+            // Generate Options Container
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            // Render randomized options
+            q.options.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option w-full p-4 text-left border-2 border-slate-200 hover:border-indigo-400 bg-white rounded-2xl font-semibold text-slate-700 flex items-center justify-between text-sm sm:text-base cursor-pointer shadow-sm';
+                btn.onclick = () => selectOption(idx);
+                
+                btn.innerHTML = `
+                    <span class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs shrink-0 option-prefix">
+                            ${String.fromCharCode(65 + idx)}
+                        </span>
+                        <span>${optionText}</span>
+                    </span>
+                    <i class="fa-regular fa-circle text-slate-300 text-lg status-icon"></i>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            answered = true;
+
+            const q = quizSessionData[currentQuestion];
+            const isCorrect = selectedIndex === q.correct;
+            const buttons = document.querySelectorAll('#options-container .btn-option');
+
+            userAnswers.push({
+                questionIndex: currentQuestion,
+                selected: selectedIndex,
+                correct: q.correct,
+                isCorrect: isCorrect
+            });
+
+            if (isCorrect) {
+                score += 10;
+                playSound('correct');
+                document.getElementById('current-score').innerText = score;
+            } else {
+                playSound('wrong');
+            }
+
+            // Highlight Option Buttons
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                const icon = btn.querySelector('.status-icon');
+                const prefix = btn.querySelector('.option-prefix');
+
+                if (idx === q.correct) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+                    prefix.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500');
+                    icon.className = 'fa-solid fa-circle-check text-emerald-600 text-xl';
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-900', 'animate-shake');
+                    prefix.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+                    icon.className = 'fa-solid fa-circle-xmark text-rose-600 text-xl';
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            // Show Explanation Box
+            const expBox = document.getElementById('explanation-box');
+            const expTitle = document.getElementById('explanation-title');
+            const expText = document.getElementById('explanation-text');
+
+            expBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-rose-50', 'border-rose-200');
+
+            if (isCorrect) {
+                expBox.classList.add('bg-emerald-50', 'border-emerald-200');
+                expTitle.className = 'font-bold flex items-center gap-2 text-emerald-800';
+                expTitle.innerHTML = '<i class="fa-solid fa-circle-check"></i> சரியான பதில்! (+10 மதிப்பெண்)';
+            } else {
+                expBox.classList.add('bg-rose-50', 'border-rose-200');
+                expTitle.className = 'font-bold flex items-center gap-2 text-rose-800';
+                expTitle.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> தவறான பதில்!';
+            }
+
+            expText.innerText = q.explanation;
+
+            // Enable Next Button
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < quizSessionData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('summary-student-name').innerText = currentStudentName;
+            document.getElementById('final-score').innerHTML = `${score} <span class="text-xl text-slate-400 font-normal">/ 150</span>`;
+            
+            const correctCount = userAnswers.filter(a => a.isCorrect).length;
+            const wrongCount = userAnswers.length - correctCount;
+
+            document.getElementById('correct-count').innerText = `${correctCount} சரியானது`;
+            document.getElementById('wrong-count').innerText = `${wrongCount} தவறானது`;
+
+            const badgeContainer = document.getElementById('badge-container');
+            const resultTitle = document.getElementById('result-title');
+            const resultSubtitle = document.getElementById('result-subtitle');
+
+            let awardCategory = "";
+            let awardBadge = "";
+
+            // Reward Tiering Logic
+            if (score >= 130) {
+                playSound('win');
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+
+                awardCategory = "தங்கம் 🏆";
+                awardBadge = "🏆 தங்கம் (Gold)";
+                badgeContainer.innerHTML = `
+                    <div class="w-28 h-28 bg-amber-400 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-amber-400/40 text-white text-5xl">
+                        🏆
+                    </div>
+                `;
+                resultTitle.innerText = "சிறந்த சாதனையாளர்! (Gold Master)";
+                resultSubtitle.innerText = "அற்புதமான படைப்பு! கிளாசிக்கல் இசைக் கருவிகளை நீங்கள் மிகச்சிறப்பாகப் புரிந்து கொண்டுள்ளீர்கள்!";
+            } else if (score >= 90) {
+                playSound('win');
+                confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+
+                awardCategory = "வெள்ளி 🥈";
+                awardBadge = "🥈 வெள்ளி (Silver)";
+                badgeContainer.innerHTML = `
+                    <div class="w-28 h-28 bg-slate-300 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-slate-300/40 text-slate-700 text-5xl">
+                        🥈
+                    </div>
+                `;
+                resultTitle.innerText = "சிறப்பு விருது! (Silver Star)";
+                resultSubtitle.innerText = "மிக நன்று! மேலும் முயற்சி செய்து 150 மதிப்பெண்களைப் பெற முயலுங்கள்!";
+            } else {
+                awardCategory = "வெண்கலம் 🥉";
+                awardBadge = "🥉 வெண்கலம் (Bronze)";
+                badgeContainer.innerHTML = `
+                    <div class="w-28 h-28 bg-amber-700 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-amber-700/40 text-white text-5xl">
+                        🥉
+                    </div>
+                `;
+                resultTitle.innerText = "நல்ல முயற்சி! (Bronze Effort)";
+                resultSubtitle.innerText = "பாடநூல் பக்கத்தை மீண்டும் வாசித்துவிட்டு மீண்டும் ஒருமுறை முயற்சி செய்து பாருங்கள்!";
+            }
+
+            // Save Student Result to Local History
+            saveStudentResult({
+                name: currentStudentName,
+                score: score,
+                correct: correctCount,
+                badge: awardBadge,
+                timestamp: new Date().toLocaleTimeString('ta-IN', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            renderLeaderboard();
+            buildReviewList();
+        }
+
+        function saveStudentResult(resultObj) {
+            let records = JSON.parse(localStorage.getItem('quiz_completed_students') || '[]');
+            // Append new attempt
+            records.push(resultObj);
+            localStorage.setItem('quiz_completed_students', JSON.stringify(records));
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('completed-students-list-body');
+            const records = JSON.parse(localStorage.getItem('quiz_completed_students') || '[]');
+
+            if (records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-4 text-center text-slate-400 italic text-xs">
+                            பட்டியல் காலியாக உள்ளது.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            records.forEach((rec, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60';
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-500">${idx + 1}</td>
+                    <td class="p-3 font-bold text-slate-800">${rec.name}</td>
+                    <td class="p-3 text-center font-extrabold text-indigo-600">${rec.score} / 150</td>
+                    <td class="p-3 text-center font-bold text-xs">${rec.badge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openTeacherAuthModal() {
+            document.getElementById('teacher-pass-input').value = '';
+            document.getElementById('teacher-auth-error').classList.add('hidden');
+            document.getElementById('teacher-auth-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('teacher-pass-input').focus(), 100);
+        }
+
+        function closeTeacherAuthModal() {
+            document.getElementById('teacher-auth-modal').classList.add('hidden');
+        }
+
+        function verifyAndClearLeaderboard() {
+            const passInput = document.getElementById('teacher-pass-input').value.trim();
+            const errorMsg = document.getElementById('teacher-auth-error');
+
+            // Passcode guru: '1234' atau 'cikgu'
+            if (passInput === '1234' || passInput === 'cikgu') {
+                localStorage.removeItem('quiz_completed_students');
+                renderLeaderboard();
+                closeTeacherAuthModal();
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function clearLeaderboard() {
+            openTeacherAuthModal();
+        }
+
+        function restartWithNewStudent() {
+            document.getElementById('student-name-input').value = '';
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        function buildReviewList() {
+            const container = document.getElementById('review-list');
+            container.innerHTML = '';
+
+            quizSessionData.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-2xl border text-sm space-y-2 ${
+                    userAns.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'
+                }`;
+
+                item.innerHTML = `
+                    <div class="font-bold text-slate-800 flex justify-between items-start gap-2">
+                        <span>${idx + 1}. ${q.question}</span>
+                        <span class="${userAns.isCorrect ? 'text-emerald-600' : 'text-rose-600'} font-bold shrink-0">
+                            ${userAns.isCorrect ? '✓ +10' : '✗ 0'}
+                        </span>
+                    </div>
+                    <div class="text-xs space-y-1">
+                        <div class="text-slate-600">
+                            உங்கள் பதில்: <strong class="${userAns.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${q.options[userAns.selected]}</strong>
+                        </div>
+                        ${!userAns.isCorrect ? `
+                            <div class="text-emerald-700 font-semibold">
+                                சரியான பதில்: ${q.correctText}
+                            </div>
+                        ` : ''}
+                        <div class="text-slate-500 italic pt-1 border-t border-slate-200/60">
+                            💡 ${q.explanation}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function toggleReviewModal(show) {
+            const modal = document.getElementById('review-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
